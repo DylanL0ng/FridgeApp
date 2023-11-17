@@ -19,8 +19,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.zxing.client.android.Intents;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -48,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
                     RequestQueue queue = Volley.newRequestQueue(this);
                     String url = "https://world.openfoodfacts.org/api/v2/product/" + barcode + ".json";
+                    Log.d("MainActivity", url);
 
                     // Request a string response from the provided URL.
                     StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -88,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
                     queue.add(stringRequest);
                 }
-            });
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,16 +95,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btn_scan = findViewById(R.id.btn_scan);
-        btn_scan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ScanOptions options = new ScanOptions();
-                options.setOrientationLocked(true);
-                options.setPrompt("Scan a barcode");
-                options.setCaptureActivity(BarcodeScanner.class);
-                options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES);
-                barcodeLauncher.launch(options);
-            }
+        btn_scan.setOnClickListener(v -> {
+
+            ScanOptions options = new ScanOptions();
+            options.setOrientationLocked(true);
+            options.setPrompt("Scan a barcode");
+            options.setCaptureActivity(BarcodeScanner.class);
+            options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES);
+            barcodeLauncher.launch(options);
+
         });
     }
 }
