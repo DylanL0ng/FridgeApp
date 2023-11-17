@@ -25,6 +25,15 @@
             android:text="Cancel" />
 
         <Button
+            android:id="@+id/rescan_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:text="Rescan" />
+
+        <Button
             android:id="@+id/addItem_btn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,15 +60,15 @@
 
         <TextView
             android:id="@+id/itemName"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
             android:layout_marginTop="32dp"
+            android:paddingLeft="4dp"
             android:text="Item Name"
             android:textSize="20sp" />
 
         <EditText
-            android:id="@+id/editTextText"
+            android:id="@+id/editProductName"
             android:layout_width="300dp"
             android:layout_height="50dp"
             android:layout_marginTop="8dp"
@@ -69,15 +78,15 @@
 
         <TextView
             android:id="@+id/itemExpiryDate"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
             android:layout_marginTop="8dp"
+            android:paddingLeft="4dp"
             android:text="Expiry Date"
             android:textSize="20sp" />
 
-        <EditText
-            android:id="@+id/editTextDate2"
+        <Button
+            android:id="@+id/editExpiryDate"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
             android:layout_marginTop="8dp"
@@ -85,6 +94,7 @@
             android:ems="10"
             android:inputType="date"
             android:text="Date"
+            android:clickable="false"
             android:textAlignment="viewStart" />
     </LinearLayout>
 

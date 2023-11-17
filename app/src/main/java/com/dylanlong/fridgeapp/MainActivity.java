@@ -12,11 +12,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.zxing.client.android.Intents;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
     Button btn_scan;
@@ -33,7 +42,51 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } else {
                     String barcode = result.getContents();
+                    Log.d("MainActivity", barcode);
+
                     Toast.makeText(MainActivity.this, barcode, Toast.LENGTH_LONG).show();
+
+                    RequestQueue queue = Volley.newRequestQueue(this);
+                    String url = "https://world.openfoodfacts.org/api/v2/product/" + barcode + ".json";
+
+                    // Request a string response from the provided URL.
+                    StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                            new Response.Listener<String>() {
+                                @Override
+                                public void onResponse(String response) {
+                                    Log.d("MainActivity", response);
+
+                                    try {
+                                        JSONObject food_data = new JSONObject(response);
+                                        Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
+
+                                        Bundle options = new Bundle();
+
+                                        String brand_name = food_data.getJSONObject("product").getString("brands");
+                                        String product_name = food_data.getJSONObject("product").getString("product_name");
+                                        String quantity = food_data.getJSONObject("product").getString("quantity");
+
+                                        String label = product_name + " - " + brand_name + " - " + quantity;
+                                        options.putString("product_name", label);
+
+                                        intent.putExtras(options);
+
+                                        startActivity(intent);
+                                    } catch (JSONException e) {
+                                        throw new RuntimeException(e);
+                                    }
+//                                    Toast.makeText(MainActivity.this, response, Toast.LENGTH_LONG);
+
+//                                    startActivity(intent, options);
+                                }
+                            }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(MainActivity.this, "That didn't work", Toast.LENGTH_LONG);
+                        }
+                    });
+
+                    queue.add(stringRequest);
                 }
             });
 
@@ -54,8 +107,5 @@ public class MainActivity extends AppCompatActivity {
                 barcodeLauncher.launch(options);
             }
         });
-
-        Intent intent = new Intent(this, CreateNewFoodItem.class);
-        startActivity(intent);
     }
 }
