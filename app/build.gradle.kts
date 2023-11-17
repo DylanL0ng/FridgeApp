@@ -43,8 +43,6 @@ dependencies {
     // https://github.com/journeyapps/zxing-android-embedded
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-//    implementation("com.google.zxing:core:3.4.1")
-//    implementation("com.journeyapps:zxing-android-embedded:4.3.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
