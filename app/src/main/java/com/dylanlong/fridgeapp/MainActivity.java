@@ -1,35 +1,98 @@
 package com.dylanlong.fridgeapp;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+//import android.arch.persistence.room.Room;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.zxing.client.android.Intents;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
-    Button btn_scan;
-    private final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(new ScanContract(),
+
+    Button scanForBarcodeButton;
+    ProductDatabase productDatabase;
+
+    ViewFridgeItem viewFridge;
+
+    FridgeItemListAdapter fridgeListAdapter;
+    RecyclerView fridgeRecyclerView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Initialise the database and recycler view
+        fridgeRecyclerView = findViewById(R.id.rvFridgeItems);
+
+        productDatabase = ProductDatabase.getInstance(this);
+        viewFridge = new ViewModelProvider(this).get((ViewFridgeItem.class));
+
+        fridgeRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Initalise list adapter
+        fridgeListAdapter = new FridgeItemListAdapter();
+        fridgeRecyclerView.setAdapter(fridgeListAdapter);
+
+        // Create an observer, when an item is a added or removed
+        // observer will fire the onChanged method which will update
+        // the list
+        viewFridge.getAllItems().observe(this, new Observer<List<FridgeItem>>() {
+            @Override
+            public void onChanged(List<FridgeItem> fridgeItems) {
+                fridgeListAdapter.setItems(fridgeItems);
+            }
+        });
+
+        // Set on click handler, will be used later on down the road
+        fridgeListAdapter.setOnItemClickListener(new FridgeItemListAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(FridgeItem fridgeItem) {
+                // TODO: Showcase an option to delete
+                Log.d("MainActivity", fridgeItem.getId() + "");
+//                productDatabase.fridgeDAO().delete(fridgeItem);
+            }
+        });
+
+        // Initialise barcode button
+        scanForBarcodeButton = findViewById(R.id.btn_scan);
+        scanForBarcodeButton.setOnClickListener(v -> {
+            // When clicked it will setup the barcode scanner
+            // and launch the activity
+
+            ScanOptions options = new ScanOptions();
+            options.setOrientationLocked(true);
+            options.setPrompt("Scan a barcode");
+            options.setCaptureActivity(BarcodeScanner.class);
+            options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES);
+            barcodeLauncher.launch(options);
+        });
+    }
+
+    // Barcode result launcher, when the result of a barcode is given it will
+    // run this method and this method handles the result logic
+    public final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(new ScanContract(),
             result -> {
-                if(result.getContents() == null) {
+                // Check if theres any result, if not its likely due to permission errors
+                if(result.getContents() == null)
+                {
+                    // Handle permission errors
                     Intent originalIntent = result.getOriginalIntent();
                     if (originalIntent == null) {
                         Log.d("MainActivity", "Cancelled scan");
@@ -38,72 +101,122 @@ public class MainActivity extends AppCompatActivity {
                         Log.d("MainActivity", "Cancelled scan due to missing camera permission");
                         Toast.makeText(MainActivity.this, "Cancelled due to missing camera permission", Toast.LENGTH_LONG).show();
                     }
-                } else {
-                    String barcode = result.getContents();
-                    Log.d("MainActivity", barcode);
 
-                    Toast.makeText(MainActivity.this, barcode, Toast.LENGTH_LONG).show();
-
-                    RequestQueue queue = Volley.newRequestQueue(this);
-                    String url = "https://world.openfoodfacts.org/api/v2/product/" + barcode + ".json";
-                    Log.d("MainActivity", url);
-
-                    // Request a string response from the provided URL.
-                    StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                            new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    Log.d("MainActivity", response);
-
-                                    try {
-                                        JSONObject food_data = new JSONObject(response);
-                                        Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
-
-                                        Bundle options = new Bundle();
-
-                                        String brand_name = food_data.getJSONObject("product").getString("brands");
-                                        String product_name = food_data.getJSONObject("product").getString("product_name");
-                                        String quantity = food_data.getJSONObject("product").getString("quantity");
-
-                                        String label = product_name + " - " + brand_name + " - " + quantity;
-                                        options.putString("product_name", label);
-
-                                        intent.putExtras(options);
-
-                                        startActivity(intent);
-                                    } catch (JSONException e) {
-                                        throw new RuntimeException(e);
-                                    }
-//                                    Toast.makeText(MainActivity.this, response, Toast.LENGTH_LONG);
-
-//                                    startActivity(intent, options);
-                                }
-                            }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Toast.makeText(MainActivity.this, "That didn't work", Toast.LENGTH_LONG);
-                        }
-                    });
-
-                    queue.add(stringRequest);
+                    return;
                 }
-    });
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+                // Get the barcode result and log it
+                String barcode = result.getContents();
 
-        btn_scan = findViewById(R.id.btn_scan);
-        btn_scan.setOnClickListener(v -> {
+                Log.d("MainActivity", barcode);
+                Toast.makeText(MainActivity.this, barcode, Toast.LENGTH_LONG).show();
 
-            ScanOptions options = new ScanOptions();
-            options.setOrientationLocked(true);
-            options.setPrompt("Scan a barcode");
-            options.setCaptureActivity(BarcodeScanner.class);
-            options.setDesiredBarcodeFormats(ScanOptions.ALL_CODE_TYPES);
-            barcodeLauncher.launch(options);
+                // Create an intent to input the expiry date and food label
+                // then bundle the barcode into the intent and start the activity
 
-        });
-    }
+                Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
+                Bundle options = new Bundle();
+                options.putString("barcode", barcode);
+
+                intent.putExtras(options);
+                startActivity(intent);
+
+                // TODO: Work on below code, it works mostly but has minor bugs that causes crashes
+                // Also, would like to clean up the code for the final project.
+
+                // Query the database to check if the product scanned already exists
+                // if so we want to use that saved products label instead of calling
+                // the api for auto completion
+
+//                Product foodItem = productDatabase.productDAO().getFoodItem(barcode).getValue();
+
+//                if (foodItem == null)
+//                {
+//                        Log.d("YourActivity", "Food item not found");
+//                        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+//                        String url = "https://world.openfoodfacts.org/api/v2/product/" + barcode + ".json";
+//                        Log.d("MainActivity", url);
+//
+//                        // Request a string response from the provided URL.
+//                        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+//                                new Response.Listener<String>() {
+//                                    @Override
+//                                    public void onResponse(String response) {
+//                                        Log.d("MainActivity", response);
+//                                        Log.d("MainActivity", "TESTING");
+//
+//                                        Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
+//                                        Bundle options = new Bundle();
+//
+//                                        try {
+//                                            JSONObject food_data = new JSONObject(response);
+//
+//                                            // Check if food was found in API
+//                                            if (food_data.getInt("status") == 0)
+//                                            {
+//                                                Log.d("MainActivity", "Food not found in API");
+//                                            }
+//                                            else
+//                                            {
+//                                                String brand_name = food_data.getJSONObject("product").getString("brands");
+//                                                String product_name = food_data.getJSONObject("product").getString("product_name");
+//                                                String quantity = food_data.getJSONObject("product").getString("quantity");
+//
+//                                                String label = product_name + " - " + brand_name + " - " + quantity;
+//                                                options.putString("product_name", label);
+//                                            }
+//
+//                                            options.putString("barcode", barcode);
+//
+//                                            intent.putExtras(options);
+//                                                startActivity(intent);
+////                                            startActivityForResult(intent, CREATE_NEW_FOOD_REQUEST);
+//                                        } catch (JSONException e) {
+//                                            throw new RuntimeException(e);
+//                                        }
+//                                    }
+//                                }, new Response.ErrorListener() {
+//                            @Override
+//                            public void onErrorResponse(VolleyError error) {
+//                                try {
+//                                    String responseBody = new String( error.networkResponse.data, "utf-8" );
+//                                    JSONObject jsonObject = new JSONObject( responseBody );
+//                                    // Check if API doesn't have barcode
+//                                    if (jsonObject.getInt("status") == 0)
+//                                    {
+//                                        Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
+//                                        startActivity(intent);
+//                                    }
+//                                } catch ( JSONException e ) {
+//                                    throw new RuntimeException(e);
+//                                } catch (UnsupportedEncodingException e) {
+//                                    throw new RuntimeException(e);
+//                                }
+//                            }
+//                        });
+//
+//                        queue.add(stringRequest);
+
+//                    Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
+//                    Bundle options = new Bundle();
+//                    options.putString("barcode", barcode);
+//
+//                    intent.putExtras(options);
+//                    startActivity(intent);
+//                }
+//                else
+//                {
+                    // If item is already labeled in database, use this label
+//                    Log.d("MainActivity", "Product found in DB");
+
+//                    Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
+//                    Bundle options = new Bundle();
+//
+//                    options.putString("barcode", foodItem.getProductCode());
+//                    options.putString("product_name", foodItem.getName());
+//
+//                    intent.putExtras(options);
+//                    startActivity(intent);
+//                }
+            });
 }

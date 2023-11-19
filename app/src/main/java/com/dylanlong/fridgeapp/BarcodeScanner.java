@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.journeyapps.barcodescanner.CaptureManager;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
 import com.journeyapps.barcodescanner.ViewfinderView;
@@ -16,9 +17,9 @@ public class BarcodeScanner extends Activity implements CompoundBarcodeView.Torc
     private CaptureManager capture;
     private CompoundBarcodeView barcodeScannerView;
 
-    private ViewfinderView viewFinderView;
+//    private ViewfinderView viewFinderView;
 
-    private Button cancelButton;
+    private FloatingActionButton cancelButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +28,7 @@ public class BarcodeScanner extends Activity implements CompoundBarcodeView.Torc
         barcodeScannerView = findViewById(R.id.scanner);
         cancelButton = findViewById(R.id.cancel_scanner);
 
-        viewFinderView = barcodeScannerView.getViewFinder();
+//        viewFinderView = barcodeScannerView.getViewFinder();
 
         // https://stackoverflow.com/questions/32579557/how-to-update-an-imported-module-in-android-studio
         // https://github.com/journeyapps/zxing-android-embedded/blob/master/zxing-android-embedded/src/com/journeyapps/barcodescanner/ViewfinderView.java#L79

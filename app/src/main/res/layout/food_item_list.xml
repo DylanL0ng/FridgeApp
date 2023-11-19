@@ -1,52 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp"
+    android:elevation="8dp"
+    app:cardCornerRadius="8dp">
 
-    <ImageView
-        android:id="@+id/productImage2"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_row="0"
-        android:layout_rowSpan="2"
-        android:layout_column="0"
-        tools:srcCompat="@tools:sample/avatars" />
-
-    <TextView
-        android:id="@+id/expiryDate"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/idLLFoodItem"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_row="1"
-        android:layout_column="1"
-        android:layout_columnWeight="1"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="TextView"
-        android:textSize="20sp" />
+        android:layout_margin="5dp"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/productName"
-        android:layout_width="177dp"
-        android:layout_height="wrap_content"
-        android:layout_row="0"
-        android:layout_column="1"
-        android:layout_columnWeight="1"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:text="Text"
-        android:textSize="30sp" />
+        <!--text view for our course name-->
+        <TextView
+            android:id="@+id/foodName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="foodName"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
 
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_row="0"
-        android:layout_rowSpan="2"
-        android:layout_column="2"
-        android:gravity="center"
-        android:text="Delete"
-        android:textSize="10sp" />
+        <!--text view for our course duration-->
 
-</GridLayout>
+        <!--text view for our course description-->
+        <TextView
+            android:id="@+id/expiryDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Expiry Date"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
