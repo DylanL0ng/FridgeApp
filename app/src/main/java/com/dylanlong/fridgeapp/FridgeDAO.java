@@ -12,20 +12,16 @@ import java.util.List;
 @androidx.room.Dao
 public interface FridgeDAO {
 
-    //below method is use to add data to database.
     @Insert
     void insert(FridgeItem model);
 
-    //below method is use to update the data in our database.
     @Update
     void update(FridgeItem model);
 
-    //below line is use to delete a specific course in our database.
     @Delete
     void delete(FridgeItem model);
 
 
-    //deleting all habits
     @Query("DELETE FROM fridge")
     void deleteAllItems();
 

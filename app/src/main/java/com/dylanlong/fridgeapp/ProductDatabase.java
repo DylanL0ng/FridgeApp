@@ -11,7 +11,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 @Database(entities = {Product.class, FridgeItem.class}, version = 3)
 public abstract class ProductDatabase extends RoomDatabase {
-    //create instance for database class
     private static ProductDatabase instance;
     public abstract ProductDAO productDAO();
     public abstract FridgeDAO fridgeDAO();
@@ -22,7 +21,6 @@ public abstract class ProductDatabase extends RoomDatabase {
                             ProductDatabase.class, "fridge_database")
                     .fallbackToDestructiveMigration()
                     .addCallback(roomCallback)
-//                    .fallbackToDestructiveMigration()
                     .build();
         }
         return instance;
@@ -42,7 +40,6 @@ public abstract class ProductDatabase extends RoomDatabase {
             ProductDAO productDAO = instance.productDAO();
             FridgeDAO fridgeDAO = instance.fridgeDAO();
         }
-
 
         @Override
         protected Void doInBackground(Void... voids) {
