@@ -4,13 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Date;
+
 @Entity(tableName = "fridge")
 public class FridgeItem {
     @PrimaryKey(autoGenerate = true)
     @NonNull
     int id;
 
-    String expiry;
+    Date expiry;
     String barcode;
     String name;
 
@@ -20,11 +22,11 @@ public class FridgeItem {
         return barcode + " " + name;
     }
 
-    public String getExpiry() {
+    public Date getExpiry() {
         return expiry;
     }
 
-    public void setExpiry(String expiry) {
+    public void setExpiry(Date expiry) {
         this.expiry = expiry;
     }
     public String getBarcode() {
@@ -51,7 +53,7 @@ public class FridgeItem {
         this.id = id;
     }
 
-    public FridgeItem(String barcode, String name, String expiry) {
+    public FridgeItem(String barcode, String name, Date expiry) {
         this.barcode = barcode;
         this.name = name;
         this.expiry = expiry;

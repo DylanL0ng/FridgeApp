@@ -3,7 +3,10 @@ package com.dylanlong.fridgeapp;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.lifecycle.Observer;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,7 +17,10 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class CreateNewFoodItem extends AppCompatActivity {
 
@@ -34,7 +40,11 @@ public class CreateNewFoodItem extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_food_item);
 
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+
         Bundle bundle = getIntent().getExtras();;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
         productDatabase = ProductDatabase.getInstance(this);
 
@@ -72,21 +82,71 @@ public class CreateNewFoodItem extends AppCompatActivity {
         addItemButton = findViewById(R.id.addItem_btn);
         addItemButton.setOnClickListener(v -> {
             String name = String.valueOf(productName.getText());
-            String expiry = String.valueOf(productExpiryDate.getText());
+            String expiry_str = String.valueOf(productExpiryDate.getText());
 
+            Date expiry = null;
+            try {
+                expiry = sdf.parse(expiry_str);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
             FridgeItem newItem = new FridgeItem(barcode, name, expiry);
             insertFood(newItem);
 
             // TODO: Add product to Database, so that we can check for
             // pre-existing names to auto-fill the input
+            final int[] count = {0};
+            productDatabase.productDAO().getFoodItem(barcode).observe(this, new Observer<Product>() {
+                @Override
+                public void onChanged(Product product) {
+                    if (count[0] > 0) return;
+                    count[0] += 1;
 
-            //            Product newProduct = new Product(barcode, name);
-            //            insertProduct(newProduct);
+                    Log.d("CreateNewFoodItem", "checking for item");
+                    if (product == null)
+                    {
+                        Product newProduct = new Product(barcode, name);
+                        insertProduct(newProduct);
+                        return;
+                    }
 
-            finish();
+                    new AlertDialog.Builder(CreateNewFoodItem.this)
+                            .setTitle("Update Database")
+                            .setMessage("This item is already saved under a different name, do you want to update the database?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Product updated = new Product(barcode, name);
+                                    updateProduct(updated);
+                                    finish();
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    finish();
+                                }
+                            })
+                            .show();
+                }
+            });
         });
     }
 
+    private void updateProduct(Product product) {
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                productDatabase.productDAO().update(product);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(CreateNewFoodItem.this, product.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+    }
     private void insertFood(FridgeItem fridgeItem) {
         AsyncTask.execute(new Runnable() {
             @Override
