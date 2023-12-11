@@ -10,7 +10,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Product.class, FridgeItem.class}, version = 3)
+@Database(entities = {Product.class, FridgeItem.class}, version = 4)
 @TypeConverters(DateTypeConverter.class)
 public abstract class ProductDatabase extends RoomDatabase {
     private static ProductDatabase instance;

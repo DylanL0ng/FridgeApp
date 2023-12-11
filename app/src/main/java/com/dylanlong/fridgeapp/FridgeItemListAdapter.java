@@ -1,5 +1,7 @@
 package com.dylanlong.fridgeapp;
 
+import android.util.Log;
+import android.util.TimeUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +15,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class FridgeItemListAdapter extends RecyclerView.Adapter<FridgeItemListAdapter.ItemViewHolder> {
     private List<FridgeItem> items = new ArrayList<>();
@@ -38,34 +42,21 @@ public class FridgeItemListAdapter extends RecyclerView.Adapter<FridgeItemListAd
         FridgeItem currentItem = items.get(position);
 
         holder.productName.setText(currentItem.getName());
-        int daysUntil = getDaysUntilTimestamp(currentItem.getExpiry());
+
+        long msDiff = Math.abs(Calendar.getInstance().getTimeInMillis() - currentItem.getExpiry());
+        long daysUntil = TimeUnit.MILLISECONDS.toDays(msDiff);
+
         String daysUntilString = daysUntil + " ";
         if (daysUntil == 1)
             daysUntilString += "day";
         else
             daysUntilString += "days";
 
-        if (daysUntil < 0)
+        if (daysUntil <= 0)
             daysUntilString = "Expired";
 
         holder.productExpiry.setText(daysUntilString);
     }
-
-    private static int getDaysUntilTimestamp(Date timestamp) {
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.O)
-            return 1;
-
-        Instant now = Instant.now();
-        Instant target = timestamp.toInstant();
-
-        LocalDate nowDate = now.atZone(ZoneId.systemDefault()).toLocalDate();
-        LocalDate targetDate = target.atZone(ZoneId.systemDefault()).toLocalDate();
-
-        // Calculate the difference in days
-        Duration duration = Duration.between(nowDate.atStartOfDay(), targetDate.atStartOfDay());
-        return (int) duration.toDays();
-    }
-
     @Override
     public int getItemCount() {
         return items.size();

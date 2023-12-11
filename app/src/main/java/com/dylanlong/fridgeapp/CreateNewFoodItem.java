@@ -26,6 +26,7 @@ public class CreateNewFoodItem extends AppCompatActivity {
 
     EditText productName;
     Button productExpiryDate;
+    Long expiryTimestamp;
     Button cancelButton;
 
     Button addItemButton;
@@ -67,6 +68,11 @@ public class CreateNewFoodItem extends AppCompatActivity {
             DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
                 @Override
                 public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                    calender.set(Calendar.YEAR, year);
+                    calender.set(Calendar.MONTH, month);
+                    calender.set(Calendar.DATE, day);
+
+                    expiryTimestamp = calender.getTimeInMillis();
                     productExpiryDate.setText(day + "/" + month + "/" + year);
                 }
             }, year, month, day);
@@ -84,13 +90,14 @@ public class CreateNewFoodItem extends AppCompatActivity {
             String name = String.valueOf(productName.getText());
             String expiry_str = String.valueOf(productExpiryDate.getText());
 
-            Date expiry = null;
-            try {
-                expiry = sdf.parse(expiry_str);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-            FridgeItem newItem = new FridgeItem(barcode, name, expiry);
+//            Date expiry = null;
+//            try {
+//                expiry = sdf.parse(expiry_str);
+//            } catch (ParseException e) {
+//                throw new RuntimeException(e);
+//            }
+
+            FridgeItem newItem = new FridgeItem(barcode, name, expiryTimestamp);
             insertFood(newItem);
 
             // TODO: Add product to Database, so that we can check for

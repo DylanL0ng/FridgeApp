@@ -12,7 +12,7 @@ public class FridgeItem {
     @NonNull
     int id;
 
-    Date expiry;
+    Long expiry;
     String barcode;
     String name;
 
@@ -22,11 +22,11 @@ public class FridgeItem {
         return barcode + " " + name;
     }
 
-    public Date getExpiry() {
+    public Long getExpiry() {
         return expiry;
     }
 
-    public void setExpiry(Date expiry) {
+    public void setExpiry(Long expiry) {
         this.expiry = expiry;
     }
     public String getBarcode() {
@@ -53,7 +53,7 @@ public class FridgeItem {
         this.id = id;
     }
 
-    public FridgeItem(String barcode, String name, Date expiry) {
+    public FridgeItem(String barcode, String name, Long expiry) {
         this.barcode = barcode;
         this.name = name;
         this.expiry = expiry;

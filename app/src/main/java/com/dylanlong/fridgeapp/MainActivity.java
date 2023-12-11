@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
         fridgeRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Initalise list adapter
+        // Initialise list adapter
         fridgeListAdapter = new FridgeItemListAdapter();
         fridgeRecyclerView.setAdapter(fridgeListAdapter);
 
@@ -100,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
             barcodeLauncher.launch(options);
         });
 
-//        if (checkSelfPermission(Manifest.permission.Ca))
     }
 
     // Barcode result launcher, when the result of a barcode is given it will
@@ -132,20 +131,6 @@ public class MainActivity extends AppCompatActivity {
                 // Create an intent to input the expiry date and food label
                 // then bundle the barcode into the intent and start the activity
 
-//                Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
-//                Bundle options = new Bundle();
-//                options.putString("barcode", barcode);
-//
-//                intent.putExtras(options);
-//                startActivity(intent);
-
-                // TODO: Work on below code, it works mostly but has minor bugs that causes crashes
-                // Also, would like to clean up the code for the final project.
-
-                // Query the database to check if the product scanned already exists
-                // if so we want to use that saved products label instead of calling
-                // the api for auto completion
-
                 Log.d("MainActivity", "Select DAO");
                 productDatabase.productDAO().getFoodItem(barcode).observe(this, new Observer<Product>() {
                     @Override
@@ -165,94 +150,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-//                if (foodItem == null)
-//                {
-//                        Log.d("YourActivity", "Food item not found");
-//                        RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-//                        String url = "https://world.openfoodfacts.org/api/v2/product/" + barcode + ".json";
-//                        Log.d("MainActivity", url);
-//
-//                        // Request a string response from the provided URL.
-//                        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-//                                new Response.Listener<String>() {
-//                                    @Override
-//                                    public void onResponse(String response) {
-//                                        Log.d("MainActivity", response);
-//                                        Log.d("MainActivity", "TESTING");
-//
-//                                        Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
-//                                        Bundle options = new Bundle();
-//
-//                                        try {
-//                                            JSONObject food_data = new JSONObject(response);
-//
-//                                            // Check if food was found in API
-//                                            if (food_data.getInt("status") == 0)
-//                                            {
-//                                                Log.d("MainActivity", "Food not found in API");
-//                                            }
-//                                            else
-//                                            {
-//                                                String brand_name = food_data.getJSONObject("product").getString("brands");
-//                                                String product_name = food_data.getJSONObject("product").getString("product_name");
-//                                                String quantity = food_data.getJSONObject("product").getString("quantity");
-//
-//                                                String label = product_name + " - " + brand_name + " - " + quantity;
-//                                                options.putString("product_name", label);
-//                                            }
-//
-//                                            options.putString("barcode", barcode);
-//
-//                                            intent.putExtras(options);
-//                                                startActivity(intent);
-////                                            startActivityForResult(intent, CREATE_NEW_FOOD_REQUEST);
-//                                        } catch (JSONException e) {
-//                                            throw new RuntimeException(e);
-//                                        }
-//                                    }
-//                                }, new Response.ErrorListener() {
-//                            @Override
-//                            public void onErrorResponse(VolleyError error) {
-//                                try {
-//                                    String responseBody = new String( error.networkResponse.data, "utf-8" );
-//                                    JSONObject jsonObject = new JSONObject( responseBody );
-//                                    // Check if API doesn't have barcode
-//                                    if (jsonObject.getInt("status") == 0)
-//                                    {
-//                                        Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
-//                                        startActivity(intent);
-//                                    }
-//                                } catch ( JSONException e ) {
-//                                    throw new RuntimeException(e);
-//                                } catch (UnsupportedEncodingException e) {
-//                                    throw new RuntimeException(e);
-//                                }
-//                            }
-//                        });
-//
-//                        queue.add(stringRequest);
-
-//                    Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
-//                    Bundle options = new Bundle();
-//                    options.putString("barcode", barcode);
-//
-//                    intent.putExtras(options);
-//                    startActivity(intent);
-//                }
-//                else
-//                {
-                    // If item is already labeled in database, use this label
-//                    Log.d("MainActivity", "Product found in DB");
-
-//                    Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
-//                    Bundle options = new Bundle();
-//
-//                    options.putString("barcode", foodItem.getProductCode());
-//                    options.putString("product_name", foodItem.getName());
-//
-//                    intent.putExtras(options);
-//                    startActivity(intent);
-//                }
             });
     ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
         @Override
