@@ -1,17 +1,13 @@
 package com.dylanlong.fridgeapp;
 
-import androidx.annotation.NonNull;
-
 import android.app.Activity;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
+
+import androidx.annotation.NonNull;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.journeyapps.barcodescanner.CaptureManager;
 import com.journeyapps.barcodescanner.CompoundBarcodeView;
-import com.journeyapps.barcodescanner.ViewfinderView;
 
 public class BarcodeScanner extends Activity implements CompoundBarcodeView.TorchListener {
     private CaptureManager capture;
@@ -43,12 +39,7 @@ public class BarcodeScanner extends Activity implements CompoundBarcodeView.Torc
         capture.setShowMissingCameraPermissionDialog(false);
         capture.decode();
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        cancelButton.setOnClickListener(v -> finish());
     }
 
     @Override

@@ -1,5 +1,13 @@
 package com.dylanlong.fridgeapp;
 
+import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,25 +20,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-//import android.arch.persistence.room.Room;
-
-import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Bundle;
-
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.material.snackbar.Snackbar;
 import com.google.zxing.client.android.Intents;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,31 +68,25 @@ public class MainActivity extends AppCompatActivity {
         // Create an observer, when an item is a added or removed
         // observer will fire the onChanged method which will update
         // the list
-        viewFridge.getAllItems().observe(this, new Observer<List<FridgeItem>>() {
-            @Override
-            public void onChanged(List<FridgeItem> fridgeItems) {
-                fridgeListAdapter.setItems(fridgeItems);
-                messagePrompt.setVisibility(fridgeItems.size() == 0 ? View.VISIBLE: View.GONE);
-            }
+        viewFridge.getAllItems().observe(this, fridgeItems -> {
+            fridgeListAdapter.setItems(fridgeItems);
+            messagePrompt.setVisibility(fridgeItems.size() == 0 ? View.VISIBLE: View.GONE);
         });
 
         // Set on click handler, will be used later on down the road
-        fridgeListAdapter.setOnItemClickListener(new FridgeItemListAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(FridgeItem fridgeItem) {
-                Intent intent = new Intent(MainActivity.this, UpdateFoodItem.class);
-                Bundle options = new Bundle();
+        fridgeListAdapter.setOnItemClickListener(fridgeItem -> {
+            Intent intent = new Intent(MainActivity.this, UpdateFoodItem.class);
+            Bundle options = new Bundle();
 
-                options.putInt("product_id", fridgeItem.getId());
-                options.putLong("product_expiry", fridgeItem.getExpiry());
-                options.putString("product_name", fridgeItem.getName());
+            options.putInt("product_id", fridgeItem.getId());
+            options.putLong("product_expiry", fridgeItem.getExpiry());
+            options.putString("product_name", fridgeItem.getName());
 
-                options.putString("barcode", fridgeItem.getBarcode());
+            options.putString("barcode", fridgeItem.getBarcode());
 
-                intent.putExtras(options);
+            intent.putExtras(options);
 
-                startActivity(intent);
-            }
+            startActivity(intent);
         });
 
         ItemTouchHelper helper = new ItemTouchHelper(callback);
@@ -180,11 +167,6 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private void deleteItem(FridgeItem fridgeItem) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                productDatabase.fridgeDAO().delete(fridgeItem);
-            }
-        });
+        AsyncTask.execute(() -> productDatabase.fridgeDAO().delete(fridgeItem));
     }
 }

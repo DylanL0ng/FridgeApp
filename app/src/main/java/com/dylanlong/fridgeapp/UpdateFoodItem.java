@@ -1,19 +1,14 @@
 package com.dylanlong.fridgeapp;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-
 import android.app.DatePickerDialog;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -75,19 +70,16 @@ public class UpdateFoodItem extends AppCompatActivity {
             int year = calender.get(Calendar.YEAR);
             int month = calender.get(Calendar.MONTH);
             int day = calender.get(Calendar.DATE);
-            DatePickerDialog datePickerDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
-                @Override
-                public void onDateSet(DatePicker datePicker, int year, int month, int day) {
-                    calender.set(Calendar.YEAR, year);
-                    calender.set(Calendar.MONTH, month);
-                    calender.set(Calendar.DATE, day);
+            DatePickerDialog datePickerDialog = new DatePickerDialog(this, (datePicker, year1, month1, day1) -> {
+                calender.set(Calendar.YEAR, year1);
+                calender.set(Calendar.MONTH, month1);
+                calender.set(Calendar.DATE, day1);
 
-                    productExpiryTimestamp = calender.getTimeInMillis();
+                productExpiryTimestamp = calender.getTimeInMillis();
 
-                    String newLabel = String.format(Locale.getDefault(), "%02d/%02d/%04d", day, month, year);
+                String newLabel = String.format(Locale.getDefault(), "%02d/%02d/%04d", day1, month1, year1);
 
-                    productExpiryDate.setText(newLabel);
-                }
+                productExpiryDate.setText(newLabel);
             }, year, month, day);
 
             datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
@@ -97,9 +89,7 @@ public class UpdateFoodItem extends AppCompatActivity {
 
 
         cancelButton = findViewById(R.id.cancel_btn);
-        cancelButton.setOnClickListener(v -> {
-            finish();
-        });
+        cancelButton.setOnClickListener(v -> finish());
 
         updateButton = findViewById(R.id.update_btn);
         updateButton.setOnClickListener(v -> {
@@ -127,12 +117,7 @@ public class UpdateFoodItem extends AppCompatActivity {
     }
 
     private void updateFood(FridgeItem fridgeItem) {
-        AsyncTask.execute(new Runnable() {
-            @Override
-            public void run() {
-                productDatabase.fridgeDAO().update(fridgeItem);
-            }
-        });
+        AsyncTask.execute(() -> productDatabase.fridgeDAO().update(fridgeItem));
     }
 
     public static String convertTimestampToDate(long timestamp) {

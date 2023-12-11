@@ -1,8 +1,7 @@
 package com.dylanlong.fridgeapp;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
-import android.util.Log;
-import android.util.TimeUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +10,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -81,6 +75,7 @@ public class FridgeItemListAdapter extends RecyclerView.Adapter<FridgeItemListAd
         return items.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void setItems(List<FridgeItem> items) {
         this.items = items;
         notifyDataSetChanged();
