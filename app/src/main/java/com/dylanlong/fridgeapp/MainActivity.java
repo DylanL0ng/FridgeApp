@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         scanForBarcodeButton.setOnClickListener(v -> {
             // When clicked it will setup the barcode scanner
             // and launch the activity
+//            Toast.makeText(MainActivity.this, "TEST", Toast.LENGTH_LONG).show();
 
             ScanOptions options = new ScanOptions();
             options.setOrientationLocked(true);
@@ -98,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
             options.setDesiredBarcodeFormats(ScanOptions.EAN_13);
             barcodeLauncher.launch(options);
         });
+
+//        if (checkSelfPermission(Manifest.permission.Ca))
     }
 
     // Barcode result launcher, when the result of a barcode is given it will
@@ -256,7 +259,6 @@ public class MainActivity extends AppCompatActivity {
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             return false;
         }
-
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
             Snackbar snackbar = Snackbar.make(constraintLayout, "Item deleted!", Snackbar.LENGTH_LONG);

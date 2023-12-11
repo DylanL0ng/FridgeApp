@@ -18,11 +18,7 @@
         android:paddingRight="8dp"
         android:paddingBottom="16dp">
 
-        <!--text view for our course name-->
 
-        <!--text view for our course duration-->
-
-        <!--text view for our course description-->
         <TextView
             android:id="@+id/foodName"
             android:layout_width="180dp"
