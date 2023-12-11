@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 
 import android.content.DialogInterface;
@@ -36,8 +37,6 @@ public class CreateNewFoodItem extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("CreateNewFoodItem", "Open new intent");
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_new_food_item);
 
@@ -111,13 +110,13 @@ public class CreateNewFoodItem extends AppCompatActivity {
             FridgeItem newItem = new FridgeItem(barcode, name, expiryTimestamp);
             insertFood(newItem);
 
-            final int[] count = {0};
-            productDatabase.productDAO().getFoodItem(barcode).observe(this, new Observer<Product>() {
+            LiveData<Product> productLiveData = productDatabase.productDAO().getFoodItem(barcode);
+            Observer<Product> observer = new Observer<Product>() {
                 @Override
                 public void onChanged(Product product) {
-                    if (count[0] > 0) return;
-                    count[0] += 1;
+                    productLiveData.removeObserver(this);
 
+                    // add to db
                     if (product == null)
                     {
                         Product newProduct = new Product(barcode, name);
@@ -145,12 +144,15 @@ public class CreateNewFoodItem extends AppCompatActivity {
                                     }
                                 })
                                 .show();
-                        return;
                     }
-
-                    finish();
+                    else
+                    {
+                        finish();
+                    }
                 }
-            });
+            };
+
+            productLiveData.observe(this, observer);
         });
     }
 

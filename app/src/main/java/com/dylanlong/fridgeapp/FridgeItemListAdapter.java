@@ -1,5 +1,6 @@
 package com.dylanlong.fridgeapp;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.util.TimeUtils;
 import android.view.LayoutInflater;
@@ -24,10 +25,14 @@ public class FridgeItemListAdapter extends RecyclerView.Adapter<FridgeItemListAd
     private List<FridgeItem> items = new ArrayList<>();
     private OnItemClickListener listener;
 
+
     public FridgeItem removeItem(int position) {
-        FridgeItem removedItem = items.get(position);
-        items.remove(position);
-        return removedItem;
+        if (position >= 0 && position < items.size()) {
+            FridgeItem removedItem = items.get(position);
+            items.remove(position);
+            return removedItem;
+        }
+        return null;
     }
 
     @NonNull
@@ -42,6 +47,7 @@ public class FridgeItemListAdapter extends RecyclerView.Adapter<FridgeItemListAd
         FridgeItem currentItem = items.get(position);
 
         holder.productName.setText(currentItem.getName());
+        holder.productName.setTextColor(Color.LTGRAY);
 
         long msDiff = Math.abs(Calendar.getInstance().getTimeInMillis() - currentItem.getExpiry());
         long daysUntil = TimeUnit.MILLISECONDS.toDays(msDiff);
@@ -55,7 +61,20 @@ public class FridgeItemListAdapter extends RecyclerView.Adapter<FridgeItemListAd
         if (daysUntil <= 0)
             daysUntilString = "Expired";
 
+        if (daysUntil <= 1)
+            holder.productExpiry.setTextColor(Color.RED);
+        else if (daysUntil <= 3)
+            holder.productExpiry.setTextColor(Color.YELLOW);
+        else
+            holder.productExpiry.setTextColor(Color.LTGRAY);
+
         holder.productExpiry.setText(daysUntilString);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(currentItem);
+            }
+        });
     }
     @Override
     public int getItemCount() {

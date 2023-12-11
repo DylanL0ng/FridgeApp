@@ -13,11 +13,11 @@ public class Product {
     private String productCode;
     private String name;
 
+    @NonNull
     @Override
     public String toString() {
         return productCode + " " + name;
     }
-
 
     public Product(String productCode, String name)
     {

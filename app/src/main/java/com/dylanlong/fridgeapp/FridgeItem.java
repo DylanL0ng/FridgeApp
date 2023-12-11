@@ -16,7 +16,6 @@ public class FridgeItem {
     String barcode;
     String name;
 
-
     @Override
     public String toString() {
         return barcode + " " + name;

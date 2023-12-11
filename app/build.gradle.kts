@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-
+    val fragment_version = "1.6.1"
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.10.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -46,14 +46,14 @@ dependencies {
     implementation("com.android.volley:volley:1.2.1")
     implementation("androidx.gridlayout:gridlayout:1.0.0")
 
+    implementation("androidx.fragment:fragment:$fragment_version")
+
     //add below dependancy for using room.
     implementation("androidx.room:room-common:2.6.0")
     implementation("androidx.room:room-runtime:2.6.0")
 
     //add below dependancy for using lifecycle extensions for room.
     annotationProcessor("androidx.room:room-compiler:2.6.0")
-//    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
-//    annotationProcessor("androidx.lifecycle:lifecycle-compiler:2.2.0")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -14,11 +15,14 @@ import androidx.recyclerview.widget.RecyclerView;
 //import android.arch.persistence.room.Room;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -27,7 +31,6 @@ import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.util.List;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
 
     ConstraintLayout constraintLayout;
 
+    TextView messagePrompt;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,7 +58,12 @@ public class MainActivity extends AppCompatActivity {
         // Initialise the database and recycler view
         fridgeRecyclerView = findViewById(R.id.rvFridgeItems);
 
+        fridgeRecyclerView.setVisibility(View.VISIBLE);
+
+        messagePrompt = findViewById(R.id.messagePrompt);
+
         productDatabase = ProductDatabase.getInstance(this);
+
         viewFridge = new ViewModelProvider(this).get((ViewFridgeItem.class));
 
         fridgeRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -69,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChanged(List<FridgeItem> fridgeItems) {
                 fridgeListAdapter.setItems(fridgeItems);
+                messagePrompt.setVisibility(fridgeItems.size() == 0 ? View.VISIBLE: View.GONE);
             }
         });
 
@@ -76,9 +87,18 @@ public class MainActivity extends AppCompatActivity {
         fridgeListAdapter.setOnItemClickListener(new FridgeItemListAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(FridgeItem fridgeItem) {
-                // TODO: Showcase an option to delete
-                Log.d("MainActivity", fridgeItem.getId() + "");
-//                productDatabase.fridgeDAO().delete(fridgeItem);
+                Intent intent = new Intent(MainActivity.this, UpdateFoodItem.class);
+                Bundle options = new Bundle();
+
+                options.putInt("product_id", fridgeItem.getId());
+                options.putLong("product_expiry", fridgeItem.getExpiry());
+                options.putString("product_name", fridgeItem.getName());
+
+                options.putString("barcode", fridgeItem.getBarcode());
+
+                intent.putExtras(options);
+
+                startActivity(intent);
             }
         });
 
@@ -90,7 +110,6 @@ public class MainActivity extends AppCompatActivity {
         scanForBarcodeButton.setOnClickListener(v -> {
             // When clicked it will setup the barcode scanner
             // and launch the activity
-//            Toast.makeText(MainActivity.this, "TEST", Toast.LENGTH_LONG).show();
 
             ScanOptions options = new ScanOptions();
             options.setOrientationLocked(true);
@@ -104,20 +123,17 @@ public class MainActivity extends AppCompatActivity {
 
     // Barcode result launcher, when the result of a barcode is given it will
     // run this method and this method handles the result logic
-    public final ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(new ScanContract(),
+    public ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(new ScanContract(),
             result -> {
                 // Check if theres any result, if not its likely due to permission errors
                 if(result.getContents() == null)
                 {
                     // Handle permission errors
                     Intent originalIntent = result.getOriginalIntent();
-                    if (originalIntent == null) {
-                        Log.d("MainActivity", "Cancelled scan");
+                    if (originalIntent == null)
                         Toast.makeText(MainActivity.this, "Cancelled", Toast.LENGTH_LONG).show();
-                    } else if(originalIntent.hasExtra(Intents.Scan.MISSING_CAMERA_PERMISSION)) {
-                        Log.d("MainActivity", "Cancelled scan due to missing camera permission");
+                    else if(originalIntent.hasExtra(Intents.Scan.MISSING_CAMERA_PERMISSION))
                         Toast.makeText(MainActivity.this, "Cancelled due to missing camera permission", Toast.LENGTH_LONG).show();
-                    }
 
                     return;
                 }
@@ -125,31 +141,28 @@ public class MainActivity extends AppCompatActivity {
                 // Get the barcode result and log it
                 String barcode = result.getContents();
 
-                Log.d("MainActivity", barcode);
-                Toast.makeText(MainActivity.this, barcode, Toast.LENGTH_LONG).show();
-
                 // Create an intent to input the expiry date and food label
                 // then bundle the barcode into the intent and start the activity
-
-                Log.d("MainActivity", "Select DAO");
-                productDatabase.productDAO().getFoodItem(barcode).observe(this, new Observer<Product>() {
+                LiveData<Product> productLiveData = productDatabase.productDAO().getFoodItem(barcode);
+                Observer<Product> observer = new Observer<Product>() {
                     @Override
                     public void onChanged(Product product) {
                         Intent intent = new Intent(MainActivity.this, CreateNewFoodItem.class);
                         Bundle options = new Bundle();
 
                         if (product != null)
-                        {
                             options.putString("product_name", product.getName());
-                        }
 
                         options.putString("barcode", barcode);
 
                         intent.putExtras(options);
                         startActivity(intent);
-                    }
-                });
 
+                        productLiveData.removeObserver(this);
+                    }
+                };
+
+                productLiveData.observe(this, observer);
             });
     ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
         @Override

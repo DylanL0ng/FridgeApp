@@ -21,7 +21,6 @@ public interface FridgeDAO {
     @Delete
     void delete(FridgeItem model);
 
-
     @Query("DELETE FROM fridge")
     void deleteAllItems();
 
