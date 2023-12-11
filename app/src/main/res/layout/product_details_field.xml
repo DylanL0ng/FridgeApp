@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_centerInParent="true"
+    >
+
+        <TextView
+            android:id="@+id/itemName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:paddingStart="4dp"
+            android:text="Item Name"
+            android:textSize="20sp" />
+
+        <EditText
+            android:id="@+id/editProductName"
+            android:layout_width="300dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:ems="10"
+            android:inputType="text"
+            android:text="Name" />
+
+        <TextView
+            android:id="@+id/itemExpiryDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingLeft="4dp"
+            android:text="Expiry Date"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/editExpiryDate"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginTop="8dp"
+            android:width="300dp"
+            android:clickable="false"
+            android:ems="10"
+            android:inputType="date"
+            android:text="Date"
+            android:textAlignment="viewStart" />
+
+</LinearLayout>
