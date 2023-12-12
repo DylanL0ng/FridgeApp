@@ -6,13 +6,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -25,39 +24,48 @@ import com.google.zxing.client.android.Intents;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+/**
+ * Student Name: Dylan Hussain
+ * Student Number: C21331063
+ *
+ *
+ * MainActivity represents the main
+ * screen of the application, displaying
+ * fridge items and providing options
+ * to scan barcodes and manage the items.
+ */
 public class MainActivity extends AppCompatActivity {
 
-    Button scanForBarcodeButton;
-    ProductDatabase productDatabase;
+    private Button scanForBarcodeButton;
+    private ProductDatabase productDatabase;
 
-    ViewFridgeItem viewFridge;
+    private ViewFridgeItem viewFridge;
 
-    FridgeItemListAdapter fridgeListAdapter;
-    RecyclerView fridgeRecyclerView;
+    private FridgeItemListAdapter fridgeListAdapter;
+    private RecyclerView fridgeRecyclerView;
 
-    ConstraintLayout constraintLayout;
+    private TextView messagePrompt;
 
-    TextView messagePrompt;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        constraintLayout = findViewById(R.id.constraint_layout);
-
+        // Set the app's mode to dark mode
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
 
         // Initialise the database and recycler view
-        fridgeRecyclerView = findViewById(R.id.rvFridgeItems);
-
-        fridgeRecyclerView.setVisibility(View.VISIBLE);
-
+        coordinatorLayout = findViewById(R.id.coordinatorLayout);
+        scanForBarcodeButton = findViewById(R.id.btn_scan);
         messagePrompt = findViewById(R.id.messagePrompt);
+        fridgeRecyclerView = findViewById(R.id.rvFridgeItems);
+        fridgeRecyclerView.setVisibility(View.VISIBLE);
 
         productDatabase = ProductDatabase.getInstance(this);
 
-        viewFridge = new ViewModelProvider(this).get((ViewFridgeItem.class));
+        viewFridge = new ViewModelProvider(this).get(ViewFridgeItem.class);
 
         fridgeRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -65,15 +73,18 @@ public class MainActivity extends AppCompatActivity {
         fridgeListAdapter = new FridgeItemListAdapter();
         fridgeRecyclerView.setAdapter(fridgeListAdapter);
 
-        // Create an observer, when an item is a added or removed
-        // observer will fire the onChanged method which will update
-        // the list
+        // Create an observer, which will trigger
+        // when an item is added or removed.
+        // The observer will fire the onChanged
+        // method which will update the list
         viewFridge.getAllItems().observe(this, fridgeItems -> {
             fridgeListAdapter.setItems(fridgeItems);
-            messagePrompt.setVisibility(fridgeItems.size() == 0 ? View.VISIBLE: View.GONE);
+            messagePrompt.setVisibility(fridgeItems.size() == 0 ? View.VISIBLE : View.GONE);
         });
 
-        // Set on click handler, will be used later on down the road
+        // Set on click handler which will
+        // start an edit activity when an
+        // item is clicked on.
         fridgeListAdapter.setOnItemClickListener(fridgeItem -> {
             Intent intent = new Intent(MainActivity.this, UpdateFoodItem.class);
             Bundle options = new Bundle();
@@ -92,11 +103,11 @@ public class MainActivity extends AppCompatActivity {
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(fridgeRecyclerView);
 
-        // Initialise barcode button
-        scanForBarcodeButton = findViewById(R.id.btn_scan);
+        // Setup click listener on new food button
         scanForBarcodeButton.setOnClickListener(v -> {
-            // When clicked it will setup the barcode scanner
-            // and launch the activity
+            // When clicked it will set up the
+            // barcode scanner and launch the
+            // activity
 
             ScanOptions options = new ScanOptions();
             options.setOrientationLocked(true);
@@ -106,30 +117,40 @@ public class MainActivity extends AppCompatActivity {
             barcodeLauncher.launch(options);
         });
 
+        if (fridgeListAdapter.getItemCount() == 0)
+        {
+            showSnackbar("You have no items in storage, add them now!");
+        }
     }
 
-    // Barcode result launcher, when the result of a barcode is given it will
-    // run this method and this method handles the result logic
+    /**
+     * Result launcher for the barcode scanner,
+     * this will fire when the barcode scanner
+     * has detected a valid barcode.
+     */
     public ActivityResultLauncher<ScanOptions> barcodeLauncher = registerForActivityResult(new ScanContract(),
             result -> {
-                // Check if theres any result, if not its likely due to permission errors
-                if(result.getContents() == null)
-                {
+                // Check if there's any result; if not
+                // it's likely due to permission errors
+                if (result.getContents() == null) {
                     // Handle permission errors
                     Intent originalIntent = result.getOriginalIntent();
+
                     if (originalIntent == null)
-                        Toast.makeText(MainActivity.this, "Cancelled", Toast.LENGTH_LONG).show();
-                    else if(originalIntent.hasExtra(Intents.Scan.MISSING_CAMERA_PERMISSION))
-                        Toast.makeText(MainActivity.this, "Cancelled due to missing camera permission", Toast.LENGTH_LONG).show();
+                        showSnackbar("Cancelled due to unknown reasons!");
+                    else if (originalIntent.hasExtra(Intents.Scan.MISSING_CAMERA_PERMISSION))
+                        showSnackbar("Cancelled due to missing camera permission!");
 
                     return;
                 }
 
-                // Get the barcode result and log it
+                // Get the barcode result and store it
                 String barcode = result.getContents();
 
-                // Create an intent to input the expiry date and food label
-                // then bundle the barcode into the intent and start the activity
+                // Create an intent to input the expiry
+                // date and food label then bundle the
+                // barcode into the intent and start the
+                // activity
                 LiveData<Product> productLiveData = productDatabase.productDAO().getFoodItem(barcode);
                 Observer<Product> observer = new Observer<Product>() {
                     @Override
@@ -151,22 +172,50 @@ public class MainActivity extends AppCompatActivity {
 
                 productLiveData.observe(this, observer);
             });
+
+    /**
+     * Registers a callback for detecting
+     * swiping on the screen. when an item
+     * is swiped on, it will trigger the
+     * adapter to remove the item from the
+     * list and the database.
+     */
     ItemTouchHelper.SimpleCallback callback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
             return false;
         }
+
         @Override
         public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
-            Snackbar snackbar = Snackbar.make(constraintLayout, "Item deleted!", Snackbar.LENGTH_LONG);
-            snackbar.show();
+            showSnackbar("Item deleted!");
 
             FridgeItem deletedItem = fridgeListAdapter.removeItem(viewHolder.getAdapterPosition());
             deleteItem(deletedItem);
         }
     };
 
+    /**
+     * Deletes a fridge item from the database
+     * in a background thread.
+     *
+     * @param fridgeItem The fridge item to be deleted.
+     */
     private void deleteItem(FridgeItem fridgeItem) {
         AsyncTask.execute(() -> productDatabase.fridgeDAO().delete(fridgeItem));
+    }
+
+    /**
+     * Displays a Snackbar with the specified
+     * message if the coordinatorLayout is not
+     * null.
+     *
+     * @param message The message to be displayed in the Snackbar.
+     */
+    private void showSnackbar(String message) {
+        if (coordinatorLayout != null) {
+            Snackbar snackbar = Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT);
+            snackbar.show();
+        }
     }
 }
